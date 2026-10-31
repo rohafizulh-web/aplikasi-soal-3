@@ -177,7 +177,7 @@ async function generateAI(payload){
  const btn=document.getElementById('generateBtn');btn.disabled=true;btn.textContent='Menghubungkan AI…';
  try{
   const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  if(!res.ok)throw new Error('Server merespons HTTP '+res.status);
+     if(!res.ok){let m='';try{m=(await res.json()).error||''}catch(e){}throw new Error('Server merespons HTTP '+res.status+(m?' — '+m:''))}
   const data=await res.json();if(!Array.isArray(data.questions)||!data.questions.length)throw new Error('Respons server tidak memiliki array questions.');
   const incoming=data.questions.slice(0,payload.count).map(q=>({...q,id:uid(),subject:payload.subject,grade:payload.grade,assessment:payload.assessment,created:new Date().toISOString(),draft:false}));
   questions=questions.concat(incoming);persist();renderGenerated(incoming);
