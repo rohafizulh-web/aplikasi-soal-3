@@ -172,7 +172,7 @@ function generateQuestions(){
 }
 function uid(){return 'q'+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 async function generateAI(payload){
- const endpoint=(JSON.parse(localStorage.getItem(SETTINGS)||'{}').backend||'').trim();
+ const endpoint='/api/generate';
  if(!endpoint){document.getElementById('generateStatus').innerHTML='<div class="notice">Alamat backend AI belum diatur. Buka menu <b>Pengaturan AI</b> untuk menghubungkan layanan AI. Anda tetap dapat menggunakan mode manual/offline.</div>';return}
  const btn=document.getElementById('generateBtn');btn.disabled=true;btn.textContent='Menghubungkan AI…';
  try{
