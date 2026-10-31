@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMART QUESTION — Generator Soal Guru SD</title>
+<style>
+:root{--blue:#2563eb;--navy:#172554;--sky:#eff6ff;--ink:#172033;--muted:#64748b;--line:#e2e8f0;--bg:#f5f7fb;--green:#0f9d72;--orange:#f59e0b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:10px;padding:10px 14px;font-weight:650}
+.primary{background:var(--blue);color:#fff}.secondary{background:#eaf1ff;color:#1d4ed8}.ghost{background:#f1f5f9;color:#334155}.danger{background:#fee2e2;color:#b91c1c}
+header{background:linear-gradient(120deg,#172554,#2563eb);color:#fff;padding:20px clamp(16px,4vw,48px);display:flex;align-items:center;justify-content:space-between;gap:18px}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:44px;height:44px;border-radius:13px;background:#fff;color:#2563eb;display:grid;place-items:center;font-size:23px;font-weight:900}.brand h1{margin:0;font-size:21px;letter-spacing:.4px}.brand p{margin:2px 0 0;color:#dbeafe;font-size:12px}
+.header-right{font-size:12px;color:#dbeafe;text-align:right}
+.shell{display:grid;grid-template-columns:235px minmax(0,1fr);max-width:1500px;margin:auto;min-height:calc(100vh - 84px)}
+aside{background:#fff;border-right:1px solid var(--line);padding:22px 14px}
+.nav-label{font-size:10px;letter-spacing:1.2px;color:#94a3b8;font-weight:800;padding:8px 12px}
+.nav{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:transparent;color:#475569;margin:3px 0;padding:11px 12px;border-radius:10px;font-weight:600}
+.nav.active{background:#eaf1ff;color:#1d4ed8}.nav span{font-size:18px;width:22px;text-align:center}
+main{padding:clamp(16px,3vw,34px);min-width:0}.welcome{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:22px}.welcome h2{margin:0;font-size:25px}.welcome p{margin:5px 0;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-bottom:22px}.stat,.panel,.card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px}.stat small{color:var(--muted)}.stat strong{display:block;font-size:25px;margin-top:5px}.panel{margin-bottom:18px}.panel h3{margin:0 0 14px;font-size:17px}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+label{display:block;font-weight:650;font-size:13px;margin:0 0 6px;color:#334155}
+input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:10px 11px;background:#fff;color:var(--ink);outline:none}
+input:focus,select:focus,textarea:focus{border-color:#60a5fa;box-shadow:0 0 0 3px #dbeafe}textarea{min-height:100px;resize:vertical}
+.field{margin-bottom:13px}.hint{font-size:12px;color:var(--muted);margin-top:5px}.checks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.check{display:flex;align-items:center;gap:8px;background:#f8fafc;padding:9px;border:1px solid var(--line);border-radius:9px;font-size:13px}.check input{width:auto}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}.notice{padding:12px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;color:#9a3412;font-size:13px;margin:12px 0}
+.success{padding:11px 13px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;color:#065f46;font-size:13px;margin:10px 0}
+.hidden{display:none!important}.question{border:1px solid var(--line);border-radius:12px;padding:14px;margin:10px 0;background:#fff}.qtop{display:flex;justify-content:space-between;gap:12px}.qmeta{font-size:11px;color:var(--muted);font-weight:700}.qtext{font-weight:650;margin:8px 0}.options{color:#475569;font-size:13px;margin:5px 0}.qtools{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.pill{display:inline-block;padding:3px 8px;background:#eff6ff;color:#1d4ed8;border-radius:20px;font-size:11px;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid #cbd5e1;padding:8px;text-align:left;vertical-align:top}th{background:#eff6ff}
+.empty{text-align:center;padding:35px 15px;color:var(--muted)}.empty b{display:block;color:#334155;margin-bottom:5px}
+footer{text-align:center;color:#94a3b8;font-size:11px;padding:20px}
+@media(max-width:800px){.shell{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line);padding:9px;display:flex;overflow:auto;gap:4px}.nav-label{display:none}.nav{white-space:nowrap;width:auto;margin:0}.nav span{width:auto}.stats{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}.checks{grid-template-columns:repeat(2,minmax(0,1fr))}.header-right{display:none}}
+@media(max-width:460px){.stats{grid-template-columns:1fr 1fr}.welcome{display:block}.welcome button{margin-top:10px}.checks{grid-template-columns:1fr 1fr}.brand h1{font-size:18px}}
+@media print{header,aside,.welcome,.stats,.no-print,footer{display:none!important}.shell{display:block}main{padding:0}.panel{border:0}.question{break-inside:avoid}.print-title{display:block!important}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand"><div class="logo">SQ</div><div><h1>SMART QUESTION</h1><p>Smart Assessment Generator for Elementary Teachers</p></div></div>
+ <div class="header-right">WORKSPACE GURU SD<br>Versi prototipe 1.0</div>
+</header>
+<div class="shell">
+<aside>
+ <div class="nav-label">MENU UTAMA</div>
+ <button class="nav active" data-page="dashboard"><span>▦</span>Dashboard</button>
+ <button class="nav" data-page="create"><span>✦</span>Buat Soal</button>
+ <button class="nav" data-page="questions"><span>☷</span>Bank Soal</button>
+ <button class="nav" data-page="blueprint"><span>▤</span>Kisi-kisi</button>
+ <button class="nav" data-page="export"><span>⇩</span>Ekspor Dokumen</button>
+ <div class="nav-label" style="margin-top:15px">PENGATURAN</div>
+ <button class="nav" data-page="settings"><span>⚙</span>Pengaturan AI</button>
+</aside>
+<main>
+<section id="page-dashboard">
+ <div class="welcome"><div><h2>Selamat datang, Guru! 👋</h2><p>Susun asesmen kelas 1–6 SD dengan lebih praktis dan terstruktur.</p></div><button class="primary" onclick="showPage('create')">＋ Buat soal baru</button></div>
+ <div class="stats">
+  <div class="stat"><small>Total soal tersimpan</small><strong id="statQuestions">0</strong></div>
+  <div class="stat"><small>Jumlah kisi-kisi</small><strong id="statBlueprint">0</strong></div>
+  <div class="stat"><small>Mode pembuatan</small><strong>AI + Manual</strong></div>
+ </div>
+ <div class="panel"><h3>Mulai dari sini</h3><div class="grid2">
+  <div class="card"><div style="font-size:25px">✦</div><b>Buat soal dari materi</b><p class="hint">Masukkan CP, tujuan pembelajaran, atau ringkasan materi untuk memulai penyusunan soal.</p><button class="secondary" onclick="showPage('create')">Mulai membuat soal</button></div>
+  <div class="card"><div style="font-size:25px">⇩</div><b>Siapkan dokumen asesmen</b><p class="hint">Cetak atau simpan naskah soal, kisi-kisi, dan kunci jawaban.</p><button class="secondary" onclick="showPage('export')">Lihat ekspor</button></div>
+ </div></div>
+ <div class="panel"><h3>Catatan penggunaan</h3><p class="hint">Data soal disimpan pada penyimpanan browser perangkat ini. Gunakan fitur ekspor/cadangkan secara berkala agar data tidak hilang ketika data browser dibersihkan.</p></div>
+</section>
+<section id="page-create" class="hidden">
+ <div class="welcome"><div><h2>Buat Soal Baru</h2><p>Atur identitas asesmen, materi, bentuk soal, dan tingkat kognitif.</p></div></div>
+ <div class="panel">
+  <h3>1. Identitas asesmen</h3>
+  <div class="grid2">
+   <div class="field"><label for="subject">Mata pelajaran</label><input id="subject" placeholder="Contoh: Pendidikan Pancasila" value="Pendidikan Pancasila"></div>
+   <div class="field"><label for="grade">Kelas</label><select id="grade"><option>Kelas 1</option><option>Kelas 2</option><option>Kelas 3</option><option selected>Kelas 4</option><option>Kelas 5</option><option>Kelas 6</option></select></div>
+   <div class="field"><label for="assessment">Jenis asesmen</label><select id="assessment"><option>Asesmen formatif</option><option>Ulangan harian</option><option>Sumatif lingkup materi</option><option>Sumatif akhir semester</option><option>Latihan</option></select></div>
+   <div class="field"><label for="count">Jumlah soal</label><select id="count"><option>5</option><option>10</option><option selected>25</option><option>30</option><option>40</option><option>50</option></select></div>
+  </div>
+ </div>
+ <div class="panel">
+  <h3>2. CP, tujuan, atau materi pembelajaran</h3>
+  <div class="field"><label for="material">Masukkan CP / TP / deskripsi materi</label><textarea id="material" placeholder="Contoh: Makna sila-sila Pancasila, penerapan nilai Pancasila, tokoh perumus Pancasila, aturan di sekolah, serta hak dan kewajiban di rumah dan sekolah.">Makna sila-sila Pancasila, penerapan nilai Pancasila, tokoh perumus Pancasila, bahasa Indonesia sebagai bahasa persatuan, aturan di sekolah dan lingkungan, serta hak dan kewajiban dalam keluarga dan sekolah.</textarea><div class="hint">Tuliskan materi dengan jelas. AI dapat mengolah uraian ini menjadi soal melalui layanan backend yang dikonfigurasi.</div></div>
+  <div class="field"><label for="notes">Ketentuan tambahan (opsional)</label><input id="notes" placeholder="Contoh: gunakan konteks kehidupan sehari-hari siswa"></div>
+ </div>
+ <div class="panel">
+  <h3>3. Bentuk soal</h3>
+  <div class="checks" id="types">
+   <label class="check"><input type="checkbox" value="Pilihan ganda" checked> Pilihan ganda</label>
+   <label class="check"><input type="checkbox" value="Pilihan ganda kompleks"> PG kompleks</label>
+   <label class="check"><input type="checkbox" value="Benar atau salah"> Benar / salah</label>
+   <label class="check"><input type="checkbox" value="Menjodohkan"> Menjodohkan</label>
+   <label class="check"><input type="checkbox" value="Isian singkat" checked> Isian singkat</label>
+   <label class="check"><input type="checkbox" value="Uraian"> Uraian</label>
+  </div>
+ </div>
+ <div class="panel">
+  <h3>4. Level kognitif</h3>
+  <div class="checks" id="levels">
+   <label class="check"><input type="checkbox" value="C1" checked> C1 — Mengingat</label>
+   <label class="check"><input type="checkbox" value="C2" checked> C2 — Memahami</label>
+   <label class="check"><input type="checkbox" value="C3" checked> C3 — Menerapkan</label>
+   <label class="check"><input type="checkbox" value="C4"> C4 — Menganalisis</label>
+   <label class="check"><input type="checkbox" value="C5"> C5 — Mengevaluasi</label>
+   <label class="check"><input type="checkbox" value="C6"> C6 — Mencipta</label>
+  </div>
+  <div class="field" style="margin-top:14px"><label for="mode">Metode pembuatan</label><select id="mode"><option value="manual">Mode manual / bantuan template (dapat digunakan offline)</option><option value="ai">Mode AI melalui backend (online)</option></select></div>
+  <div class="notice" id="aiNotice">Mode AI membutuhkan alamat backend yang aman. Jangan menaruh API key rahasia langsung di file HTML atau browser.</div>
+  <div class="actions"><button class="primary" id="generateBtn" onclick="generateQuestions()">✦ Buat soal</button><button class="ghost" onclick="clearForm()">Reset formulir</button></div>
+  <div id="generateStatus" aria-live="polite"></div>
+ </div>
+ <div class="panel hidden" id="generatedPanel"><h3>Hasil penyusunan soal</h3><div id="generatedList"></div></div>
+</section>
+<section id="page-questions" class="hidden">
+ <div class="welcome"><div><h2>Bank Soal</h2><p>Kelola dan periksa soal yang tersimpan di perangkat ini.</p></div><button class="secondary" onclick="showPage('create')">＋ Tambah soal</button></div>
+ <div class="panel"><div id="bankList"></div></div>
+</section>
+<section id="page-blueprint" class="hidden">
+ <div class="welcome"><div><h2>Kisi-Kisi Soal</h2><p>Rekap indikator dan level kognitif dari bank soal.</p></div><button class="secondary" onclick="window.print()">Cetak kisi-kisi</button></div>
+ <div class="panel"><div id="blueprintTable"></div></div>
+</section>
+<section id="page-export" class="hidden">
+ <div class="welcome"><div><h2>Ekspor Dokumen</h2><p>Siapkan naskah soal dan kisi-kisi untuk dicetak.</p></div></div>
+ <div class="panel"><h3>Pilih dokumen</h3><div class="grid2">
+  <div class="card"><b>📝 Naskah soal + kunci jawaban</b><p class="hint">Dokumen Word kompatibel (.doc) berisi soal tersimpan dan kunci jawaban.</p><button class="primary" onclick="exportWord()">Unduh Word</button></div>
+  <div class="card"><b>📄 PDF / cetak</b><p class="hint">Buka dialog cetak browser, lalu pilih “Save as PDF”.</p><button class="primary" onclick="printDocument()">Cetak / Simpan PDF</button></div>
+  <div class="card"><b>▤ Kisi-kisi</b><p class="hint">Ekspor tabel kisi-kisi soal dalam format Word.</p><button class="secondary" onclick="exportBlueprint()">Unduh kisi-kisi Word</button></div>
+  <div class="card"><b>💾 Cadangan data</b><p class="hint">Simpan bank soal sebagai file JSON agar dapat dipindahkan atau dipulihkan.</p><button class="secondary" onclick="backupData()">Cadangkan data</button><label style="margin-top:12px">Pulihkan cadangan JSON</label><input type="file" id="restoreFile" accept=".json,application/json" onchange="restoreData(event)"></div>
+ </div><div class="notice">Catatan: file Word dibuat dalam format .doc yang dapat dibuka dan diedit di Microsoft Word. PDF dibuat melalui fitur cetak browser.</div></div>
+</section>
+<section id="page-settings" class="hidden">
+ <div class="welcome"><div><h2>Pengaturan AI</h2><p>Hubungkan aplikasi ke server AI tanpa mengekspos API key di browser.</p></div></div>
+ <div class="panel">
+  <h3>Koneksi backend AI</h3>
+  <div class="field"><label for="backend">URL endpoint backend</label><input id="backend" placeholder="https://server-anda.example/api/generate-questions"></div>
+  <div class="hint">Endpoint backend harus menerima POST JSON dan mengembalikan JSON berisi array <code>questions</code>. Format tiap soal: type, level, question, options (opsional), answer, explanation (opsional), indicator (opsional).</div>
+  <div class="field" style="margin-top:14px"><label for="apiModel">Nama model / catatan layanan (opsional)</label><input id="apiModel" placeholder="Contoh: model AI yang digunakan"></div>
+  <div class="actions"><button class="primary" onclick="saveSettings()">Simpan pengaturan</button><button class="ghost" onclick="testBackend()">Uji koneksi</button></div>
+  <div id="settingsStatus"></div>
+ </div>
+ <div class="notice"><b>Keamanan penting:</b> jangan masukkan API key langsung di halaman ini. API key harus disimpan di server/backend yang Anda kendalikan. Prototipe ini belum menyediakan server AI bawaan.</div>
+</section>
+<footer>SMART QUESTION • Prototipe aplikasi guru SD • Simpan cadangan data secara berkala</footer>
+</main></div>
+<script>
+const STORE='smartQuestionData_v1', SETTINGS='smartQuestionSettings_v1';
+let questions=loadData();
+function loadData(){try{return JSON.parse(localStorage.getItem(STORE)||'[]')}catch(e){return[]}}
+function persist(){localStorage.setItem(STORE,JSON.stringify(questions));refreshStats()}
+function refreshStats(){document.getElementById('statQuestions').textContent=questions.length;document.getElementById('statBlueprint').textContent=questions.filter(q=>q.indicator).length}
+function showPage(name){document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));document.getElementById('page-'+name).classList.remove('hidden');document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.page===name));if(name==='questions')renderBank();if(name==='blueprint')renderBlueprint();if(name==='settings')loadSettings();if(name==='export'){}window.scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('.nav').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+function selected(group){return [...document.querySelectorAll('#'+group+' input:checked')].map(x=>x.value)}
+function clearForm(){document.getElementById('material').value='';document.getElementById('notes').value='';document.getElementById('generateStatus').innerHTML='';document.getElementById('generatedPanel').classList.add('hidden')}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function generateQuestions(){
+ const subject=document.getElementById('subject').value.trim(),grade=document.getElementById('grade').value,material=document.getElementById('material').value.trim(),count=Number(document.getElementById('count').value),types=selected('types'),levels=selected('levels'),mode=document.getElementById('mode').value;
+ if(!subject||!material||!types.length||!levels.length){alert('Lengkapi mata pelajaran, materi, bentuk soal, dan level kognitif.');return}
+ if(mode==='ai'){generateAI({subject,grade,material,count,types,levels,assessment:document.getElementById('assessment').value,notes:document.getElementById('notes').value});return}
+ const topics=material.split(/[,;\n]+/).map(x=>x.trim().replace(/[.]+$/,'')).filter(Boolean);
+ const templates={
+ 'Pilihan ganda':(t,i)=>({question:`Manakah pernyataan yang paling tepat tentang ${t.toLowerCase()}?`,options:[`Pernyataan yang sesuai dengan materi ${t.toLowerCase()}`,`Pernyataan yang bertentangan dengan materi`,`Hal yang tidak berkaitan dengan materi`,`Semua pernyataan selalu benar`],answer:'A',explanation:`Periksa kembali konsep ${t.toLowerCase()} pada materi pembelajaran.`}),
+ 'Pilihan ganda kompleks':(t,i)=>({question:`Pilih semua pernyataan yang benar berkaitan dengan ${t.toLowerCase()}.`,options:[`Pernyataan yang sesuai dengan ${t.toLowerCase()}`,`Contoh penerapan dalam kehidupan sehari-hari`,`Pernyataan yang tidak berhubungan`,`Contoh yang bertentangan dengan materi`],answer:'A dan B',explanation:`Jawaban perlu disesuaikan dengan konsep ${t.toLowerCase()}.`}),
+ 'Benar atau salah':(t,i)=>({question:`Pernyataan: "${t}". Apakah pernyataan tersebut sesuai dengan materi yang dipelajari?`,options:['Benar','Salah'],answer:'Periksa kesesuaian pernyataan dengan materi',explanation:'Validasi pernyataan berdasarkan sumber ajar.'}),
+ 'Menjodohkan':(t,i)=>({question:`Pasangkan konsep dan contoh yang tepat tentang ${t.toLowerCase()}.`,options:['Kolom A: Konsep atau istilah','Kolom B: Pengertian atau contoh'],answer:'Sesuaikan pasangan berdasarkan materi',explanation:'Guru perlu melengkapi pasangan spesifik berdasarkan bahan ajar.'}),
+ 'Isian singkat':(t,i)=>({question:`Tuliskan satu contoh atau penjelasan singkat tentang ${t.toLowerCase()}!`,options:[],answer:'Jawaban sesuai konsep materi',explanation:`Jawaban dapat bervariasi selama sesuai dengan ${t.toLowerCase()}.`}),
+ 'Uraian':(t,i)=>({question:`Jelaskan ${t.toLowerCase()} dan berikan contoh penerapannya dalam kehidupan sehari-hari!`,options:[],answer:'Memuat penjelasan konsep dan contoh yang relevan',explanation:'Nilai berdasarkan ketepatan konsep, kelengkapan, dan relevansi contoh.'})
+ };
+ const generated=[];
+ for(let i=0;i<count;i++){const type=types[i%types.length],topic=topics[i%topics.length],level=levels[i%levels.length],data=templates[type](topic,i);generated.push({id:uid(),subject,grade,assessment:document.getElementById('assessment').value,type,level,topic,indicator:`Peserta didik mampu memahami atau menerapkan ${topic.toLowerCase()}.`,...data,created:new Date().toISOString(),draft:true})}
+ questions=questions.concat(generated);persist();renderGenerated(generated);
+ document.getElementById('generateStatus').innerHTML='<div class="success">Template '+generated.length+' soal berhasil dibuat dan disimpan. <b>Periksa dan sunting semua soal sebelum digunakan.</b></div>';
+}
+function uid(){return 'q'+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+async function generateAI(payload){
+ const endpoint=(JSON.parse(localStorage.getItem(SETTINGS)||'{}').backend||'').trim();
+ if(!endpoint){document.getElementById('generateStatus').innerHTML='<div class="notice">Alamat backend AI belum diatur. Buka menu <b>Pengaturan AI</b> untuk menghubungkan layanan AI. Anda tetap dapat menggunakan mode manual/offline.</div>';return}
+ const btn=document.getElementById('generateBtn');btn.disabled=true;btn.textContent='Menghubungkan AI…';
+ try{
+  const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  if(!res.ok)throw new Error('Server merespons HTTP '+res.status);
+  const data=await res.json();if(!Array.isArray(data.questions)||!data.questions.length)throw new Error('Respons server tidak memiliki array questions.');
+  const incoming=data.questions.slice(0,payload.count).map(q=>({...q,id:uid(),subject:payload.subject,grade:payload.grade,assessment:payload.assessment,created:new Date().toISOString(),draft:false}));
+  questions=questions.concat(incoming);persist();renderGenerated(incoming);
+  document.getElementById('generateStatus').innerHTML='<div class="success">AI menghasilkan '+incoming.length+' soal. Silakan periksa dan edit sebelum digunakan.</div>';
+ }catch(e){document.getElementById('generateStatus').innerHTML='<div class="notice">Gagal membuat soal dengan AI: '+escapeHtml(e.message)+'. Periksa endpoint/backend dan format respons.</div>'}
+ finally{btn.disabled=false;btn.textContent='✦ Buat soal'}
+}
+function renderGenerated(list){document.getElementById('generatedPanel').classList.remove('hidden');document.getElementById('generatedList').innerHTML=list.map(q=>questionCard(q)).join('')}
+function questionCard(q){return `<div class="question" data-id="${q.id}"><div class="qtop"><span class="qmeta">${escapeHtml(q.type)} · ${escapeHtml(q.level)} · ${escapeHtml(q.topic||'')}</span><span class="pill">${q.draft?'Perlu ditinjau':'AI'}</span></div><div class="qtext">${escapeHtml(q.question)}</div>${q.options?.length?'<div class="options">'+q.options.map((o,i)=>`${String.fromCharCode(65+i)}. ${escapeHtml(o)}`).join('<br>')+'</div>':''}<div class="options"><b>Kunci:</b> ${escapeHtml(q.answer||'Belum diisi')}</div><div class="qtools no-print"><button class="ghost" onclick="editQuestion('${q.id}')">Edit</button><button class="danger" onclick="deleteQuestion('${q.id}')">Hapus</button></div></div>`}
+function renderBank(){const el=document.getElementById('bankList');el.innerHTML=questions.length?questions.map(questionCard).join(''):'<div class="empty"><b>Belum ada soal tersimpan</b>Buat soal baru untuk mengisi bank soal.</div>'}
+function editQuestion(id){const q=questions.find(x=>x.id===id);if(!q)return;const question=prompt('Edit pertanyaan:',q.question);if(question===null)return;q.question=question;const answer=prompt('Edit kunci jawaban:',q.answer||'');if(answer!==null)q.answer=answer;persist();renderBank();const panel=document.getElementById('generatedList');if(panel)panel.innerHTML=questions.filter(x=>x.id===id).map(questionCard).join('')}
+function deleteQuestion(id){if(!confirm('Hapus soal ini?'))return;questions=questions.filter(q=>q.id!==id);persist();renderBank();document.getElementById('generatedList').innerHTML=''}
+function renderBlueprint(){const el=document.getElementById('blueprintTable');if(!questions.length){el.innerHTML='<div class="empty"><b>Kisi-kisi belum tersedia</b>Tambahkan soal terlebih dahulu.</div>';return}
+ el.innerHTML='<table><thead><tr><th>No.</th><th>Materi</th><th>Indikator</th><th>Level</th><th>Bentuk soal</th></tr></thead><tbody>'+questions.map((q,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(q.topic||'-')}</td><td>${escapeHtml(q.indicator||'Perlu dilengkapi')}</td><td>${escapeHtml(q.level||'-')}</td><td>${escapeHtml(q.type||'-')}</td></tr>`).join('')+'</tbody></table>'}
+function docShell(title,body){return `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><style>body{font-family:Arial,sans-serif;font-size:11pt;line-height:1.5}h1,h2{text-align:center}table{border-collapse:collapse;width:100%}td,th{border:1px solid #555;padding:6px;text-align:left} .q{margin:15px 0;page-break-inside:avoid}</style></head><body>${body}</body></html>`}
+function downloadDoc(filename,content){const blob=new Blob(['\ufeff',content],{type:'application/msword'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();URL.revokeObjectURL(a.href)}
+function exportWord(){if(!questions.length){alert('Belum ada soal untuk diekspor.');return}const first=questions[0];let body=`<h1>NASKAH SOAL</h1><h2>${escapeHtml(first.subject||'')}</h2><p><b>Kelas:</b> ${escapeHtml(first.grade||'')} &nbsp; <b>Asesmen:</b> ${escapeHtml(first.assessment||'')}</p><p>Nama: ............................................. &nbsp; Kelas: ................</p><hr>`;questions.forEach((q,i)=>{body+=`<div class="q"><b>${i+1}. ${escapeHtml(q.question)}</b>${q.options?.length?'<p>'+q.options.map((o,j)=>`${String.fromCharCode(65+j)}. ${escapeHtml(o)}`).join('&nbsp;&nbsp;&nbsp;')+'</p>':''}</div>`});body+='<h2>KUNCI JAWABAN DAN PEMBAHASAN</h2>';questions.forEach((q,i)=>body+=`<p>${i+1}. <b>${escapeHtml(q.answer||'Belum diisi')}</b> — ${escapeHtml(q.explanation||'')}</p>`);downloadDoc('Naskah_Soal_Smart_Question.doc',docShell('Naskah Soal',body))}
+function exportBlueprint(){if(!questions.length){alert('Belum ada soal.');return}let body='<h1>KISI-KISI SOAL</h1><table><tr><th>No.</th><th>Mapel</th><th>Kelas</th><th>Materi</th><th>Indikator</th><th>Level</th><th>Bentuk</th></tr>';questions.forEach((q,i)=>body+=`<tr><td>${i+1}</td><td>${escapeHtml(q.subject)}</td><td>${escapeHtml(q.grade)}</td><td>${escapeHtml(q.topic||'')}</td><td>${escapeHtml(q.indicator||'')}</td><td>${escapeHtml(q.level||'')}</td><td>${escapeHtml(q.type||'')}</td></tr>`);body+='</table>';downloadDoc('Kisi_Kisi_Smart_Question.doc',docShell('Kisi-kisi',body))}
+function printDocument(){if(!questions.length){alert('Belum ada soal.');return}const w=window.open('','_blank');if(!w){alert('Izinkan pop-up untuk mencetak dokumen.');return}let body=`<h1>NASKAH SOAL</h1><h2>${escapeHtml(questions[0].subject||'')}</h2><p>Kelas: ${escapeHtml(questions[0].grade||'')}</p><p>Nama: ............................................. Kelas: ................</p>`;questions.forEach((q,i)=>body+=`<p><b>${i+1}. ${escapeHtml(q.question)}</b><br>${(q.options||[]).map((o,j)=>`${String.fromCharCode(65+j)}. ${escapeHtml(o)}`).join('&nbsp;&nbsp;&nbsp;')}</p>`);w.document.write(docShell('Cetak Soal',body));w.document.close();w.focus();setTimeout(()=>w.print(),400)}
+function backupData(){const blob=new Blob([JSON.stringify({questions,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cadangan-smart-question.json';a.click();URL.revokeObjectURL(a.href)}
+function restoreData(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const data=JSON.parse(r.result);if(!Array.isArray(data.questions))throw new Error('Format cadangan tidak sesuai');if(!confirm('Pulihkan '+data.questions.length+' soal? Data saat ini akan diganti.'))return;questions=data.questions;persist();alert('Cadangan berhasil dipulihkan.');}catch(err){alert('Gagal memulihkan: '+err.message)}};r.readAsText(file)}
+function loadSettings(){const s=JSON.parse(localStorage.getItem(SETTINGS)||'{}');document.getElementById('backend').value=s.backend||'';document.getElementById('apiModel').value=s.model||''}
+function saveSettings(){const s={backend:document.getElementById('backend').value.trim(),model:document.getElementById('apiModel').value.trim()};localStorage.setItem(SETTINGS,JSON.stringify(s));document.getElementById('settingsStatus').innerHTML='<div class="success">Pengaturan tersimpan pada browser ini.</div>'}
+async function testBackend(){saveSettings();const endpoint=document.getElementById('backend').value.trim();if(!endpoint){alert('Masukkan URL backend terlebih dahulu.');return}const el=document.getElementById('settingsStatus');el.innerHTML='<div class="hint">Menguji koneksi…</div>';try{const r=await fetch(endpoint,{method:'OPTIONS'});el.innerHTML='<div class="success">Server merespons. Pastikan endpoint mendukung POST JSON sesuai format aplikasi.</div>'}catch(e){el.innerHTML='<div class="notice">Koneksi tidak dapat diuji dari browser: '+escapeHtml(e.message)+'. Pastikan URL aktif dan CORS dikonfigurasi.</div>'}}
+document.getElementById('mode').addEventListener('change',e=>document.getElementById('aiNotice').classList.toggle('hidden',e.target.value!=='ai'));
+refreshStats();loadSettings();
+</script>
+</body></html>
