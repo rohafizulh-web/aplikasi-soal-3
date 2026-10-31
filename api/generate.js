@@ -6,12 +6,35 @@ module.exports = async (req, res) => {
 
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method === "GET") {
-    return res.status(200).json({
+    const info = {
       status: "backend hidup",
-      versi: "v3-flash-latest",
+      versi: "v4-diagnosa",
       model: "gemini-flash-latest",
       apiKeyTerbaca: Boolean(process.env.GEMINI_API_KEY),
-    });
+    };
+    // Tes langsung ke Gemini: buka /api/generate?tes=1
+    if (req.query && req.query.tes && process.env.GEMINI_API_KEY) {
+      try {
+        const r = await fetch(
+          "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-goog-api-key": process.env.GEMINI_API_KEY,
+            },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: "Balas satu kata saja: halo" }] }],
+            }),
+          }
+        );
+        const t = await r.text();
+        info.hasilTesGemini = { httpStatus: r.status, balasan: t.slice(0, 600) };
+      } catch (e) {
+        info.hasilTesGemini = { galat: e.message };
+      }
+    }
+    return res.status(200).json(info);
   }
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Gunakan metode POST" });
