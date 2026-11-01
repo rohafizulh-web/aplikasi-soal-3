@@ -1,39 +1,78 @@
+const MODELS = [
+  "gemini-flash-latest",
+  "gemini-3.6-flash",
+  "gemini-3.5-flash",
+  "gemini-3.5-flash-lite",
+];
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Coba tiap model; kalau sibuk (503/429/500) ulangi, kalau tidak ada (404) pindah model.
+async function callGemini(apiKey, body) {
+  const gagal = [];
+  for (const model of MODELS) {
+    for (let percobaan = 0; percobaan < 2; percobaan++) {
+      let r, data;
+      try {
+        r = await fetch(
+          "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-goog-api-key": apiKey,
+            },
+            body: JSON.stringify(body),
+          }
+        );
+        data = await r.json();
+      } catch (e) {
+        gagal.push(model + ": " + e.message);
+        continue;
+      }
+      if (r.ok) return { ok: true, model, data, gagal };
+
+      gagal.push(model + ": " + r.status);
+      const pesan = (data && data.error && data.error.message) || "";
+      const bisaCobaLagi = [404, 429, 500, 503, 504].includes(r.status);
+      if (!bisaCobaLagi) return { ok: false, status: r.status, pesan, gagal };
+      if (r.status === 404) break; // model tidak dikenal, langsung model berikutnya
+      await sleep(1500);
+    }
+  }
+  return {
+    ok: false,
+    status: 503,
+    pesan: "Semua model Gemini sedang sibuk. Coba lagi dalam beberapa menit.",
+    gagal,
+  };
+}
+
 module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") return res.status(200).end();
+
   if (req.method === "GET") {
     const info = {
       status: "backend hidup",
-      versi: "v4-diagnosa",
-      model: "gemini-flash-latest",
+      versi: "v5-cadangan-model",
+      daftarModel: MODELS,
       apiKeyTerbaca: Boolean(process.env.GEMINI_API_KEY),
     };
     if (req.query && req.query.tes && process.env.GEMINI_API_KEY) {
-      try {
-        const r = await fetch(
-          "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-goog-api-key": process.env.GEMINI_API_KEY,
-            },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: "Balas satu kata saja: halo" }] }],
-            }),
-          }
-        );
-        const t = await r.text();
-        info.hasilTesGemini = { httpStatus: r.status, balasan: t.slice(0, 600) };
-      } catch (e) {
-        info.hasilTesGemini = { galat: e.message };
-      }
+      const h = await callGemini(process.env.GEMINI_API_KEY, {
+        contents: [{ parts: [{ text: "Balas satu kata saja: halo" }] }],
+      });
+      info.hasilTesGemini = h.ok
+        ? { berhasil: true, modelDipakai: h.model, percobaanGagal: h.gagal }
+        : { berhasil: false, status: h.status, pesan: h.pesan, percobaanGagal: h.gagal };
     }
     return res.status(200).json(info);
   }
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Gunakan metode POST" });
   }
@@ -104,34 +143,23 @@ Aturan:
   };
 
   try {
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            responseSchema: schema,
-          },
-        }),
-      }
-    );
+    const h = await callGemini(apiKey, {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: schema,
+      },
+    });
 
-    const data = await response.json();
-    if (!response.ok) {
+    if (!h.ok) {
       return res.status(502).json({
         error:
-          "Gemini membalas " + response.status + ": " +
-          ((data.error && data.error.message) || "Gagal memanggil Gemini"),
+          "Gemini membalas " + h.status + ": " + (h.pesan || "Gagal memanggil Gemini") +
+          " (" + h.gagal.join(", ") + ")",
       });
     }
 
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const text = h.data.candidates?.[0]?.content?.parts?.[0]?.text || "";
     let parsed;
     try {
       parsed = JSON.parse(text);
