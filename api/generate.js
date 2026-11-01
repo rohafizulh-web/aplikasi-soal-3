@@ -1,24 +1,34 @@
+// Urutan: model cepat dulu. Yang tidak dikenal atau lambat otomatis dilewati.
 const MODELS = [
   "gemini-flash-latest",
+  "gemini-3.5-flash-lite",
   "gemini-3.6-flash",
   "gemini-3.5-flash",
-  "gemini-3.5-flash-lite",
 ];
 
-const UKURAN_BAGIAN = 10; // soal per permintaan ke Gemini
-const BATAS_WAKTU_MS = 48000; // berhenti mencoba setelah ini (Vercel batas 60 detik)
+const UKURAN_BAGIAN = 8; // soal per permintaan ke Gemini
+const BATAS_WAKTU_MS = 50000; // total waktu mencoba (Vercel batas 60 detik)
+const WAKTU_PER_PERCOBAAN_MS = 22000;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// Coba tiap model; kalau sibuk (503/429/500) ulangi, kalau tidak ada (404) pindah model.
+// Coba tiap model: sibuk (503/429/500) diulang sekali, lambat atau tidak ada (404) pindah model.
 async function callGemini(apiKey, body, mulai) {
   const gagal = [];
   for (const model of MODELS) {
-    for (let percobaan = 0; percobaan < 2; percobaan++) {
+    let tanpaBerpikir = false; // true jika model menolak pengaturan berpikir
+    for (let percobaan = 0; percobaan < 3; percobaan++) {
       const sisa = BATAS_WAKTU_MS - (Date.now() - mulai);
-      if (sisa < 4000) {
+      if (sisa < 5000) {
         return { ok: false, status: 504, pesan: "Waktu habis, coba jumlah soal lebih sedikit.", gagal };
       }
+
+      const isi = JSON.parse(JSON.stringify(body));
+      isi.generationConfig = isi.generationConfig || {};
+      if (!tanpaBerpikir) {
+        isi.generationConfig.thinkingConfig = { thinkingLevel: "low" };
+      }
+
       let r, data;
       try {
         r = await fetch(
@@ -29,29 +39,37 @@ async function callGemini(apiKey, body, mulai) {
               "Content-Type": "application/json",
               "x-goog-api-key": apiKey,
             },
-            body: JSON.stringify(body),
-            signal: AbortSignal.timeout(Math.min(sisa, 40000)),
+            body: JSON.stringify(isi),
+            signal: AbortSignal.timeout(Math.min(sisa, WAKTU_PER_PERCOBAAN_MS)),
           }
         );
         data = await r.json();
       } catch (e) {
-        gagal.push(model + ": " + e.message);
-        continue;
+        gagal.push(model + ": " + (e.name === "TimeoutError" ? "lambat" : e.message));
+        break; // lambat atau error jaringan: pindah ke model berikutnya
       }
       if (r.ok) return { ok: true, model, data, gagal };
 
       gagal.push(model + ": " + r.status);
       const pesan = (data && data.error && data.error.message) || "";
+
+      // Model menolak pengaturan berpikir: ulangi tanpa pengaturan itu
+      if (r.status === 400 && !tanpaBerpikir && /think/i.test(pesan)) {
+        tanpaBerpikir = true;
+        continue;
+      }
+
       const bisaCobaLagi = [404, 429, 500, 503, 504].includes(r.status);
       if (!bisaCobaLagi) return { ok: false, status: r.status, pesan, gagal };
       if (r.status === 404) break;
-      await sleep(1200);
+      if (percobaan >= 1) break;
+      await sleep(1000);
     }
   }
   return {
     ok: false,
     status: 503,
-    pesan: "Semua model Gemini sedang sibuk. Coba lagi dalam beberapa menit.",
+    pesan: "Semua model Gemini sedang sibuk atau lambat. Coba lagi dalam beberapa menit.",
     gagal,
   };
 }
@@ -118,19 +136,20 @@ module.exports = async (req, res) => {
   if (req.method === "GET") {
     const info = {
       status: "backend hidup",
-      versi: "v6-bagian-paralel",
+      versi: "v7-cepat",
       daftarModel: MODELS,
       apiKeyTerbaca: Boolean(process.env.GEMINI_API_KEY),
     };
     if (req.query && req.query.tes && process.env.GEMINI_API_KEY) {
+      const t0 = Date.now();
       const h = await callGemini(
         process.env.GEMINI_API_KEY,
         { contents: [{ parts: [{ text: "Balas satu kata saja: halo" }] }] },
-        Date.now()
+        t0
       );
       info.hasilTesGemini = h.ok
-        ? { berhasil: true, modelDipakai: h.model, percobaanGagal: h.gagal }
-        : { berhasil: false, status: h.status, pesan: h.pesan, percobaanGagal: h.gagal };
+        ? { berhasil: true, modelDipakai: h.model, durasiMs: Date.now() - t0, percobaanGagal: h.gagal }
+        : { berhasil: false, status: h.status, pesan: h.pesan, durasiMs: Date.now() - t0, percobaanGagal: h.gagal };
     }
     return res.status(200).json(info);
   }
@@ -160,14 +179,13 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: "Mata pelajaran dan materi wajib diisi" });
   }
 
-  // Pecah menjadi beberapa bagian kecil yang dikerjakan bersamaan
   const totalBagian = Math.ceil(count / UKURAN_BAGIAN);
   const jumlahTiapBagian = [];
-  let sisa = count;
+  let sisaSoal = count;
   for (let i = 0; i < totalBagian; i++) {
-    const n = Math.min(UKURAN_BAGIAN, sisa);
+    const n = Math.min(UKURAN_BAGIAN, sisaSoal);
     jumlahTiapBagian.push(n);
-    sisa -= n;
+    sisaSoal -= n;
   }
 
   const mulai = Date.now();
