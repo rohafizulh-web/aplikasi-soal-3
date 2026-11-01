@@ -1,5 +1,4 @@
 module.exports = async (req, res) => {
-  // Izinkan akses dari browser (CORS) dan tes koneksi
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -12,7 +11,6 @@ module.exports = async (req, res) => {
       model: "gemini-flash-latest",
       apiKeyTerbaca: Boolean(process.env.GEMINI_API_KEY),
     };
-    // Tes langsung ke Gemini: buka /api/generate?tes=1
     if (req.query && req.query.tes && process.env.GEMINI_API_KEY) {
       try {
         const r = await fetch(
